@@ -13,6 +13,14 @@ func main() {
 	tokenCommand := flag.String("token-command", "", "OIDC token command if using web identity")
 	flag.Parse()
 
+	subcommand := flag.Arg(0)
+
+	if subcommand == "get" {
+		get(secretArn, role, tokenCommand)
+	}
+}
+
+func get(secretArn *string, role *string, tokenCommand *string) {
 	if secretArn == nil || *secretArn == "" {
 		log.Fatal("-secret-arn is required")
 	}

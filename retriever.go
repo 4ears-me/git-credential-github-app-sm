@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"os/exec"
+	"strings"
 )
 
 type commandRetriever struct {
@@ -12,7 +13,9 @@ type commandRetriever struct {
 func (c *commandRetriever) GetIdentityToken() ([]byte, error) {
 	var buffer bytes.Buffer
 
-	cmd := exec.Command(c.command)
+	cmdParts := strings.Split(c.command, " ") // This is not idea, but it should do for now.
+
+	cmd := exec.Command(cmdParts[0], cmdParts[1:]...)
 	cmd.Stdout = &buffer
 	err := cmd.Run()
 
