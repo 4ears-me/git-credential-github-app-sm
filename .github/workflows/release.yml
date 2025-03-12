@@ -27,3 +27,97 @@ jobs:
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  docker-arm64:
+    runs-on: codebuild-4ears-me-${{ github.run_id }}-${{ github.run_attempt }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: AWS assume
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-skip-session-tagging: true
+          aws-region: us-west-2
+          role-to-assume: arn:aws:iam::374142386962:role/github-credential-provider-publish
+
+      - name: Login to Amazon ECR Public
+        id: login-ecr-public
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          registry-type: public
+
+      - name: Build, tag, and push docker image to Amazon ECR Public
+        env:
+          REGISTRY: ${{ steps.login-ecr-public.outputs.registry }}
+          REGISTRY_ALIAS: y1c6o4t8
+          REPOSITORY: git-credential-github-app-sm
+          IMAGE_TAG: ${{ github.ref_name }}-arm64
+        run: |
+          docker build -t $REGISTRY/$REGISTRY_ALIAS/$REPOSITORY:$IMAGE_TAG .
+          docker push $REGISTRY/$REGISTRY_ALIAS/$REPOSITORY:$IMAGE_TAG
+
+  docker-amd64:
+    runs-on:
+      - codebuild-4ears-me-${{ github.run_id }}-${{ github.run_attempt }}
+      - image:linux-5.0
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: AWS assume
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-skip-session-tagging: true
+          aws-region: us-west-2
+          role-to-assume: arn:aws:iam::374142386962:role/github-credential-provider-publish
+
+      - name: Login to Amazon ECR Public
+        id: login-ecr-public
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          registry-type: public
+
+      - name: Build, tag, and push docker image to Amazon ECR Public
+        env:
+          REGISTRY: ${{ steps.login-ecr-public.outputs.registry }}
+          REGISTRY_ALIAS: y1c6o4t8
+          REPOSITORY: git-credential-github-app-sm
+          IMAGE_TAG: ${{ github.ref_name }}-amd64
+        run: |
+          docker build -t $REGISTRY/$REGISTRY_ALIAS/$REPOSITORY:$IMAGE_TAG .
+          docker push $REGISTRY/$REGISTRY_ALIAS/$REPOSITORY:$IMAGE_TAG
+
+  docker-manifest:
+    runs-on: codebuild-4ears-me-${{ github.run_id }}-${{ github.run_attempt }}
+    needs:
+      - docker-amd64
+      - docker-arm64
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: AWS assume
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-skip-session-tagging: true
+          aws-region: us-west-2
+          role-to-assume: arn:aws:iam::374142386962:role/github-credential-provider-publish
+
+      - name: Login to Amazon ECR Public
+        id: login-ecr-public
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          registry-type: public
+
+      - name: Push manifest
+        env:
+          REGISTRY: ${{ steps.login-ecr-public.outputs.registry }}
+          REGISTRY_ALIAS: y1c6o4t8
+          REPOSITORY: git-credential-github-app-sm
+          IMAGE_TAG: ${{ github.ref_name }}
+        run: |
+          docker manifest create $REGISTRY/$REGISTRY_ALIAS/$REPOSITORY:$IMAGE_TAG-amd64 $REGISTRY/$REGISTRY_ALIAS/$REPOSITORY:$IMAGE_TAG-arm64 $REGISTRY/$REGISTRY_ALIAS/$REPOSITORY:$IMAGE_TAG
+          docker manifest push $REGISTRY/$REGISTRY_ALIAS/$REPOSITORY:$IMAGE_TAG
