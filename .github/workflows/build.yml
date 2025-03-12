@@ -5,6 +5,7 @@ on:
 
 permissions:
   contents: read
+  id-token: write
 
 env:
   CGO_ENABLED: 0
@@ -26,3 +27,71 @@ jobs:
 
       - name: Test build
         run: go build ...
+
+  docker:
+    runs-on:
+      - codebuild-4ears-me-${{ github.run_id }}-${{ github.run_attempt }}
+      - image:${{ matrix.version }}
+      - size:${{ matrix.size }}
+
+    strategy:
+      matrix:
+        include:
+          - arch: arm64
+            version: arm-3.0
+            size: small
+          - arch: amd64
+            version: linux-5.0
+            size: small
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: AWS assume
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-skip-session-tagging: true
+          aws-region: us-east-1
+          role-to-assume: arn:aws:iam::374142386962:role/github-credential-pr
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, tag, and push docker image to Amazon ECR
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: git-credential-github-app-sm
+          IMAGE_TAG: ${{ github.sha }}-${{ matrix.arch }}
+        run: |
+          docker build -t $REGISTRY/$REPOSITORY:$IMAGE_TAG .
+          docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+
+  docker-manifest:
+    runs-on: codebuild-4ears-me-${{ github.run_id }}-${{ github.run_attempt }}
+    needs:
+      - docker
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: AWS assume
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-skip-session-tagging: true
+          aws-region: us-east-1
+          role-to-assume: arn:aws:iam::374142386962:role/github-credential-pr
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Push manifest
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: git-credential-github-app-sm
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker manifest create $REGISTRY/$REPOSITORY:$IMAGE_TAG $REGISTRY/$REPOSITORY:$IMAGE_TAG-amd64 $REGISTRY/$REPOSITORY:$IMAGE_TAG-arm64
+          docker manifest push $REGISTRY/$REPOSITORY:$IMAGE_TAG

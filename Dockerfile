@@ -1,4 +1,4 @@
-FROM golang:1.24 AS build
+FROM 374142386962.dkr.ecr.us-east-1.amazonaws.com/docker-hub/library/golang:1.24 AS build
 LABEL authors="Brian Tajuddin"
 
 RUN mkdir /code
