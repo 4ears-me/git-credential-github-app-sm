@@ -56,6 +56,10 @@ jobs:
           aws-region: us-east-1
           role-to-assume: arn:aws:iam::374142386962:role/github-credential-provider-publish
 
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
       - name: Login to Amazon ECR Public
         id: login-ecr-public
         uses: aws-actions/amazon-ecr-login@v2
