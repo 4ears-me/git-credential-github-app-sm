@@ -30,3 +30,20 @@ We also recommend using a credential cache to limit the number of requests to Gi
 ```shell
 git config credential.https://github.com.helper
 ```
+
+### Docker
+If you need access to the helper in docker, it can be complicated to install Go (if you don't use it) or get the right
+binary. We provide x86-64 and arm64 docker images at `https://gallery.ecr.aws/y1c6o4t8/git-credential-github-app-sm`.
+
+You can use these images like this:
+
+```dockerfile
+FROM public.ecr.aws/y1c6o4t8/git-credential-github-app-sm:v0.1.7 AS git-helper
+
+# Build your image
+FROM ubuntu:latest
+# Do some stuff that you need
+
+# COPY it somewhere on your path
+COPY --from=git-helper /git-credential-github-app-sm /usr/bin
+```
