@@ -1,6 +1,11 @@
 # git-credential-github-app-sm
 
 [![release](https://github.com/4ears-me/git-credential-github-app-sm/actions/workflows/release.yml/badge.svg)](https://github.com/4ears-me/git-credential-github-app-sm/actions/workflows/release.yml)
+![GitHub License](https://img.shields.io/github/license/4ears-me/git-credential-github-app-sm)
+![GitHub Tag](https://img.shields.io/github/v/tag/4ears-me/git-credential-github-app-sm)
+[![Go Report Card](https://goreportcard.com/badge/github.com/4ears-me/git-credential-github-app-sm)](https://goreportcard.com/report/github.com/4ears-me/git-credential-github-app-sm)
+![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/4ears-me/git-credential-github-app-sm)
+[![Go.Dev reference](https://img.shields.io/badge/go.dev-reference-blue?logo=go&logoColor=white)](https://pkg.go.dev/github.com/4ears-me/git-credential-github-app-sm?tab=doc)
 
 This is a simple git credential provider for authenticating GitHub apps by installation. The secret must
 be stored in AWS Secrets Manager with a string value of the format:
