@@ -1,5 +1,7 @@
 # git-credential-github-app-sm
 
+[![release](https://github.com/4ears-me/git-credential-github-app-sm/actions/workflows/release.yml/badge.svg)](https://github.com/4ears-me/git-credential-github-app-sm/actions/workflows/release.yml)
+
 This is a simple git credential provider for authenticating GitHub apps by installation. The secret must
 be stored in AWS Secrets Manager with a string value of the format:
 
