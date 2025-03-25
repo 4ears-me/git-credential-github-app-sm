@@ -29,6 +29,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Fetch package info
+        uses: andrewslotin/go-proxy-pull-action@v1.3.0
+
   docker:
     runs-on:
       - codebuild-4ears-me-${{ github.run_id }}-${{ github.run_attempt }}
