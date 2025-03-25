@@ -1,4 +1,4 @@
-module github.com/4ears-me/github-app-credential-helper/git-credential-github-app-sm
+module github.com/4ears-me/git-credential-github-app-sm
 
 go 1.24
 
